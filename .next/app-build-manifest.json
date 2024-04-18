@@ -1,0 +1,15 @@
+{
+  "pages": {
+    "/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/page.js"
+    ],
+    "/layout": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/css-src_styles_globals_css-node_modules_pnpm_next_14_2_1_react-dom_18_2_0_react_18_2_0_node_m-47dcb3.css",
+      "static/chunks/app/layout.js"
+    ]
+  }
+}
