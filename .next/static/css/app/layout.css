@@ -573,6 +573,15 @@ video {
   .top-1 {
   top: 0.25rem;
 }
+  .left-2 {
+  left: 0.5rem;
+}
+  .top-2 {
+  top: 0.5rem;
+}
+  .top-4 {
+  top: 1rem;
+}
   .z-10 {
   z-index: 10;
 }
@@ -609,6 +618,18 @@ video {
 }
   .mt-auto {
   margin-top: auto;
+}
+  .mr-4 {
+  margin-right: 1rem;
+}
+  .ml-8 {
+  margin-left: 2rem;
+}
+  .ml-6 {
+  margin-left: 1.5rem;
+}
+  .ml-12 {
+  margin-left: 3rem;
 }
   .block {
   display: block;

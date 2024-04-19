@@ -5,35 +5,70 @@ import ChatTextInput from "./_components/ChatTextInput";
 import { Message } from "ai";
 
 export default function Home() {
+  const userMessages: Message[] = [
+    {
+      id: "2id",
+      role: "user",
+      content: "I need to update the schedule for Nurse #2.",
+    },
+    {
+      id: "4id",
+      role: "user",
+      content: "John C. will be available from 10am to 5pm on Monday.",
+    },
+  ];
+  const assistantMessages: Message[] = [
+    {
+      id: "1id",
+      role: "assistant",
+      content: "Hello, how can I assist you with the scheduling today?",
+    },
+    { id: "3id", role: "assistant", content: "Sure, what is the update?" },
+  ];
+
   const [messages, setMessages] = React.useState<Message[]>([
     {
       id: "1id",
       role: "assistant",
       content: "Hello, how can I assist you with the scheduling today?",
     },
-    {
-      id: "2id",
-      role: "user",
-      content: "I need to update the schedule for Nurse #2.",
-    },
-    { id: "3id", role: "assistant", content: "Sure, what is the update?" },
-    {
-      id: "4id",
-      role: "user",
-      content: "John C. will be available from 10am to 5pm on Monday.",
-    },
   ]);
+
   const [input, setInput] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
 
   const handleInputSubmit = () => {
     if (input.trim() !== "") {
-      const newMessage: Message = {
-        id: messages.length + 1 + "id",
-        role: "user",
-        content: input,
-      };
-      setMessages([...messages, newMessage]);
+      // Find the next user message that hasn't been added to messages yet
+      const nextUserMessage = userMessages.find(
+        (userMsg) => !messages.some((msg) => msg.id === userMsg.id),
+      );
+
+      // Find the next assistant message that hasn't been added to messages yet
+      const nextAssistantMessage = assistantMessages.find(
+        (assistantMsg) => !messages.some((msg) => msg.id === assistantMsg.id),
+      );
+
+      if (nextUserMessage) {
+        // Add the next user message to the messages
+        setMessages((prevMessages) => [...prevMessages, nextUserMessage]);
+
+        // Set loading to true
+        setIsLoading(true);
+
+        // Wait for 2 seconds before adding the assistant message
+        setTimeout(() => {
+          if (nextAssistantMessage) {
+            setMessages((prevMessages) => [
+              ...prevMessages,
+              nextAssistantMessage,
+            ]);
+          }
+          setIsLoading(false);
+        }, 2000);
+      }
+
+      // Clear the input field
       setInput("");
     }
   };
