@@ -1,65 +1,132 @@
-import Link from "next/link";
+"use client";
+import React from "react";
+import MessageList from "./_components/MessageList";
+import ChatTextInput from "./_components/ChatTextInput";
+import { Message } from "ai";
 
-import { CreatePost } from "~/app/_components/create-post";
-import { api } from "~/trpc/server";
+export default function Home() {
+  const [messages, setMessages] = React.useState<Message[]>([
+    {
+      id: "1id",
+      role: "assistant",
+      content: "Hello, how can I assist you with the scheduling today?",
+    },
+    {
+      id: "2id",
+      role: "user",
+      content: "I need to update the schedule for Nurse #2.",
+    },
+    { id: "3id", role: "assistant", content: "Sure, what is the update?" },
+    {
+      id: "4id",
+      role: "user",
+      content: "John C. will be available from 10am to 5pm on Monday.",
+    },
+  ]);
+  const [input, setInput] = React.useState("");
+  const [isLoading, setIsLoading] = React.useState(false);
 
-export default async function Home() {
-  const hello = await api.post.hello({ text: "from tRPC" });
+  const handleInputSubmit = () => {
+    if (input.trim() !== "") {
+      const newMessage: Message = {
+        id: messages.length + 1 + "id",
+        role: "user",
+        content: input,
+      };
+      setMessages([...messages, newMessage]);
+      setInput("");
+    }
+  };
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInput(event.target.value);
+  };
+
+  // Mock data for the calendar
+  const calendarData = {
+    Physician: {
+      Monday: { name: "Marcus A.", time: "8am-2pm" },
+      Tuesday: "",
+      Wednesday: "",
+    },
+    "Nurse #1": {
+      Monday: "",
+      Tuesday: { name: "Linda B.", time: "9am-3pm" },
+      Wednesday: "",
+    },
+    "Nurse #2": {
+      Monday: { name: "John C.", time: "10am-4pm" },
+      Tuesday: "",
+      Wednesday: "",
+    },
+    "Nurse #3": {
+      Monday: "",
+      Tuesday: "",
+      Wednesday: { name: "Emily D.", time: "11am-5pm" },
+    },
+  };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white">
-      <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16 ">
-        <h1 className="text-5xl font-extrabold tracking-tight sm:text-[5rem]">
-          Create <span className="text-[hsl(280,100%,70%)]">T3</span> App
-        </h1>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-8">
-          <Link
-            className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20"
-            href="https://create.t3.gg/en/usage/first-steps"
-            target="_blank"
-          >
-            <h3 className="text-2xl font-bold">First Steps →</h3>
-            <div className="text-lg">
-              Just the basics - Everything you need to know to set up your
-              database and authentication.
-            </div>
-          </Link>
-          <Link
-            className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20"
-            href="https://create.t3.gg/en/introduction"
-            target="_blank"
-          >
-            <h3 className="text-2xl font-bold">Documentation →</h3>
-            <div className="text-lg">
-              Learn more about Create T3 App, the libraries it uses, and how to
-              deploy it.
-            </div>
-          </Link>
-        </div>
-        <div className="flex flex-col items-center gap-2">
-          <p className="text-2xl text-white">
-            {hello ? hello.greeting : "Loading tRPC query..."}
-          </p>
+    <main className="flex h-full bg-gray-200">
+      <div className="flex h-full w-full">
+        {/* Chat interface */}
+        <div className="overflow-aut flex w-1/4 flex-col bg-white p-4">
+          <div className="flex-grow overflow-auto">
+            <MessageList messages={messages} isMobileMode={false} />
+          </div>
+          <ChatTextInput
+            input={input}
+            handleInputChange={handleInputChange}
+            handleInputSubmit={handleInputSubmit}
+            isLoading={isLoading}
+            isMobileMode={false}
+          />
         </div>
 
-        <CrudShowcase />
+        {/* Calendar table view */}
+        <div className="h-full w-3/4 bg-white p-4">
+          <table className="h-full w-full table-fixed border-collapse border border-gray-300">
+            <thead>
+              <tr>
+                <th className="w-1/4 rounded-tl-lg bg-gray-100 p-4 text-center font-bold"></th>
+                <th className="w-1/4 border border-gray-300 bg-white p-4 text-center">
+                  Monday
+                </th>
+                <th className="w-1/4 border border-gray-300 bg-gray-100 p-4 text-center">
+                  Tuesday
+                </th>
+                <th className="w-1/4 rounded-tr-lg border border-gray-300 bg-white p-4 text-center">
+                  Wednesday
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.entries(calendarData).map(([role, days]) => (
+                <tr key={role}>
+                  <td className="border border-gray-300 bg-gray-100 p-4 text-center font-bold">
+                    {role}
+                  </td>
+                  {Object.entries(days).map(([day, shift], index) => (
+                    <td
+                      key={day}
+                      className={`border border-gray-300 p-4 text-center ${index % 2 === 0 ? "bg-white" : "bg-gray-100"}`}
+                    >
+                      {typeof shift === "object" && shift.name && shift.time ? (
+                        <div className="h-16 rounded-md border-2 border-blue-500 bg-white p-2 shadow-sm">
+                          <div>{shift.name}</div>
+                          <div>{shift.time}</div>
+                        </div>
+                      ) : (
+                        <div className="h-16 rounded-md  border-gray-300 p-2 shadow-sm"></div>
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </main>
-  );
-}
-
-async function CrudShowcase() {
-  const latestPost = await api.post.getLatest();
-
-  return (
-    <div className="w-full max-w-xs">
-      {latestPost ? (
-        <p className="truncate">Your most recent post: {latestPost.name}</p>
-      ) : (
-        <p>You have no posts yet.</p>
-      )}
-
-      <CreatePost />
-    </div>
   );
 }
