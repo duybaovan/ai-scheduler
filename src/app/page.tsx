@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import MessageList from "./_components/MessageList";
 import ChatTextInput from "./_components/ChatTextInput";
 import { Message } from "ai";
@@ -16,14 +16,20 @@ export default function Home() {
       role: "user",
       content: "John C. will be available from 10am to 5pm on Monday.",
     },
+    {
+      id: "5id",
+      role: "user",
+      content: "John C. will be available from 10am to 5pm on Monday.",
+    },
   ];
   const assistantMessages: Message[] = [
     {
-      id: "1id",
+      id: "1ida",
       role: "assistant",
       content: "Hello, how can I assist you with the scheduling today?",
     },
-    { id: "3id", role: "assistant", content: "Sure, what is the update?" },
+    { id: "3ida", role: "assistant", content: "Sure, what is the update?" },
+    { id: "4ida", role: "assistant", content: "Sure, what is the update?" },
   ];
 
   const [messages, setMessages] = React.useState<Message[]>([
@@ -36,6 +42,79 @@ export default function Home() {
 
   const [input, setInput] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
+
+  type Shift = { name: string; time: string } | null;
+
+  const calendar2 = React.useState<Record<string, Record<string, Shift>>>({
+    Physician: {
+      Monday: { name: "Marcus A.", time: "8am-2pm" },
+      Tuesday: { name: "John K. (Internal)", time: "8am-2pm" },
+      Wednesday: { name: "Chris W. (Locums)", time: "8am-2pm" },
+    },
+    "Nurse #1": {
+      Monday: null,
+      Tuesday: { name: "Linda B.", time: "2am-8pm" },
+      Wednesday: null,
+    },
+    "Nurse #2": {
+      Monday: { name: "John C.", time: "10am-4pm" },
+      Tuesday: null,
+      Wednesday: null,
+    },
+    "Nurse #3": {
+      Monday: null,
+      Tuesday: null,
+      Wednesday: { name: "Emily D.", time: "11am-5pm" },
+    },
+  });
+
+  const calendar3 = React.useState<Record<string, Record<string, Shift>>>({
+    Physician: {
+      Monday: { name: "Marcus A.", time: "8am-2pm" },
+      Tuesday: { name: "John K. (Internal)", time: "8am-2pm" },
+      Wednesday: { name: "Chris W. (Locums)", time: "8am-2pm" },
+    },
+    "Nurse #1": {
+      Monday: { name: "Emily D.", time: "2am-8pm" },
+      Tuesday: { name: "Linda B.", time: "2am-8pm" },
+      Wednesday: { name: "Emily D.", time: "2am-8pm" },
+    },
+    "Nurse #2": {
+      Monday: { name: "John C.", time: "10am-4pm" },
+      Tuesday: { name: "Linda B.", time: "9am-3pm" },
+      Wednesday: { name: "Linda B.", time: "9am-3pm" },
+    },
+    "Nurse #3": {
+      Monday: { name: "Linda B.", time: "9am-3pm" },
+      Tuesday: { name: "John V. (internal)", time: "9am-3pm" },
+      Wednesday: { name: "Emily D.", time: "11am-5pm" },
+    },
+  });
+
+  const [calendarData, setCalendarData] = React.useState<
+    Record<string, Record<string, Shift>>
+  >({
+    Physician: {
+      Monday: { name: "Marcus A.", time: "8am-2pm" },
+      Tuesday: null,
+      Wednesday: null,
+    },
+    "Nurse #1": {
+      Monday: null,
+      Tuesday: { name: "Linda B.", time: "9am-3pm" },
+      Wednesday: null,
+    },
+    "Nurse #2": {
+      Monday: { name: "John C.", time: "10am-4pm" },
+      Tuesday: null,
+      Wednesday: null,
+    },
+    "Nurse #3": {
+      Monday: null,
+      Tuesday: null,
+      Wednesday: { name: "Emily D.", time: "11am-5pm" },
+    },
+  });
 
   const handleInputSubmit = () => {
     if (input.trim() !== "") {
@@ -63,9 +142,20 @@ export default function Home() {
               ...prevMessages,
               nextAssistantMessage,
             ]);
+            setCalendarData((prevCalendarData) => {
+              // Toggle between calendar2 and calendar3 based on the current state
+              if (
+                JSON.stringify(prevCalendarData) ===
+                JSON.stringify(calendar2[0])
+              ) {
+                return calendar3[0];
+              } else {
+                return calendar2[0];
+              }
+            });
           }
           setIsLoading(false);
-        }, 2000);
+        }, 1500);
       }
 
       // Clear the input field
@@ -75,30 +165,6 @@ export default function Home() {
 
   const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(event.target.value);
-  };
-
-  // Mock data for the calendar
-  const calendarData = {
-    Physician: {
-      Monday: { name: "Marcus A.", time: "8am-2pm" },
-      Tuesday: "",
-      Wednesday: "",
-    },
-    "Nurse #1": {
-      Monday: "",
-      Tuesday: { name: "Linda B.", time: "9am-3pm" },
-      Wednesday: "",
-    },
-    "Nurse #2": {
-      Monday: { name: "John C.", time: "10am-4pm" },
-      Tuesday: "",
-      Wednesday: "",
-    },
-    "Nurse #3": {
-      Monday: "",
-      Tuesday: "",
-      Wednesday: { name: "Emily D.", time: "11am-5pm" },
-    },
   };
 
   return (
@@ -146,7 +212,7 @@ export default function Home() {
                       key={day}
                       className={`border border-gray-300 p-4 text-center ${index % 2 === 0 ? "bg-white" : "bg-gray-100"}`}
                     >
-                      {typeof shift === "object" && shift.name && shift.time ? (
+                      {typeof shift === "object" && shift ? (
                         <div className="h-16 rounded-md border-2 border-blue-500 bg-white p-2 shadow-sm">
                           <div>{shift.name}</div>
                           <div>{shift.time}</div>
